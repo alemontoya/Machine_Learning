@@ -1,0 +1,52 @@
+---
+title: "Titanic Features Analysis"
+author: "Alejandro Montoya"
+date: "May 31, 2017"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Data Load
+
+``` {r loadData}
+df_titanic <- read.csv("train.csv", stringsAsFactors = FALSE)
+head(df_titanic)
+```
+
+#Data Cleansing
+
+``` {r dataCleansing}
+#Drops some columns that we know don't add anything to the analysis
+df_titanic <- select(df_titanic, Pclass, Sex, Age, SibSp, Parch, Fare, Embarked)
+head(df_titanic)
+
+#Drops the rows that have some NA values
+df_titanic <- na.omit(df_titanic)
+head(df_titanic)
+
+#Changes strings values of sex to numeric values (male = 0, female = 1)
+df_titanic$NumSex <- ifelse(df_titanic$Sex == 'male', 0, 1)
+
+#Changes the strings values of sex to numeric values (S = 1, C = 2, Q = 3)
+df_titanic$NumEmbarked <- ifelse(df_titanic$Embarked == 'S', 1, ifelse(df_titanic$Embarked == 'C', 2, 3))
+
+```
+
+#Data Exploration
+
+``` {r dataExploration}
+#Creates a matrix with the data in the data frame to create a heat map
+#mat_titanic <- as.matrix(df_titanic)
+mat_titanic <- as.matrix(select(df_titanic, Age, NumSex, Pclass, NumEmbarked, SibSp, Parch))
+
+#Shows a heat map and clustering of the data
+heatmap(mat_titanic)
+
+svd_titanic <- svd(scale(mat_titanic))
+par(mfrow=c(1,2))
+plot(svd_titanic$d, xlab = "Column", ylab = "Singular value", pch = 19, col = "lightblue")
+plot(svd_titanic$d^2/sum(svd_titanic$d^2), xlab = "Column", ylab = "Prop. of variance explained", pch = 19, col = "sienna1")
+```
